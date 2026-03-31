@@ -1,4 +1,4 @@
-Intelligent Legal Case Analysis System
+# Intelligent Legal Case Analysis System
 Overview
 
 This project is an NLP-based system that analyzes legal case documents and identifies similar judgments. It helps users explore relationships between cases by applying text similarity and linguistic analysis techniques.
