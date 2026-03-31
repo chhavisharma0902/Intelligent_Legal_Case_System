@@ -7,4 +7,3 @@ matplotlib
 wordcloud
 spacy
 plotly
-en_core_web_sm
