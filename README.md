@@ -55,4 +55,6 @@ These techniques help in identifying relationships between legal documents and e
 
 ---
 
-## Project Structure
+## Purpose of the Project
+
+The goal of this project is to demonstrate how Natural Language Processing techniques can be applied to legal text analysis. By combining text similarity, entity recognition, and visualization methods, the system helps in understanding relationships between legal cases and extracting useful insights from large legal datasets.
