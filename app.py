@@ -114,14 +114,13 @@ if menu == "Search Case":
             save_to_history(results_df, "Keyword_Search", keywords)
 
             st.success("Search saved to history")
-
             st.header("Analytics")
 
             plot_year_distribution(results_df)
             plot_similarity(results_df)
             plot_top_legal_terms(vectorizer ,embeddings)
             if st.checkbox("Show WordCloud"):
-                show_wordcloud(results_df, df)
+                show_wordcloud(vectorizer,embeddings)
 
     # ------------------------------
     # TEXT INPUT
@@ -171,6 +170,11 @@ if menu == "Search Case":
         save_to_history(similar_df, filename, keywords)
 
         st.success("Search saved to history")
+        cases_text_list = []
+
+        for file in similar_df["file_name"]:
+            text = df[df["file_name"] == file]["clean_text"].values[0]
+            cases_text_list.append(text)
 
         # ------------------------------
         # ANALYTICS
@@ -180,9 +184,9 @@ if menu == "Search Case":
         plot_year_distribution(similar_df)
         plot_top_legal_terms(vectorizer,embeddings)
         plot_similarity(similar_df)
-        plot_keyword_cooccurrence(df["clean_text"].tolist())
+        plot_keyword_cooccurrence(vectorizer,embeddings,cases_text_list)
         st.subheader("Important Legal Terms WordCloud")
-        show_wordcloud(similar_df, df)
+        show_wordcloud(vectorizer,embeddings)
 
 
 # ============================================

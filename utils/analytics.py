@@ -1,5 +1,5 @@
 import streamlit as st
-from wordcloud import WordCloud
+from wordcloud import WordCloud , STOPWORDS
 import seaborn as sns
 import matplotlib.pyplot as plt
 from collections import Counter , defaultdict
@@ -7,6 +7,13 @@ from itertools import combinations
 import pandas as pd
 from utils.text_processing import build_cooccurrence
 import numpy as np
+
+
+legal_stopwords = {
+        "org","court","case","judge","said","order","date","section",
+        "act","law","article","clause","person","report",
+        "period","detention","provision","reference"
+    }
 
 # Global theme
 sns.set_theme(style="whitegrid")
@@ -63,33 +70,22 @@ def plot_similarity(similar_df):
     st.pyplot(fig)
 
 
-def show_wordcloud(similar_df, df):
-    text = ""
+def show_wordcloud(vectorizer, embeddings, top_n=100):
 
-    for file in similar_df["file_name"]:
-        text += df[df["file_name"] == file]["clean_text"].values[0]
+    terms = vectorizer.get_feature_names_out()
 
-    if text.strip() == "":
-        return
+    scores = np.asarray(embeddings.sum(axis=0)).flatten()
 
-    # custom legal stopwords
-    legal_stopwords = {
-        "court","case","judge","said","order","date","section",
-        "act","law","article","clause","person","report",
-        "period","detention","provision","reference"
-    }
+    top_idx = scores.argsort()[::-1][:top_n]
 
-    stopwords = STOPWORDS.union(legal_stopwords)
+    word_freq = {terms[i]: scores[i] for i in top_idx}
 
     wc = WordCloud(
         width=900,
         height=450,
         background_color="white",
-        colormap="coolwarm",
-        stopwords=stopwords,
-        max_words=120,
-        min_font_size=10
-    ).generate(text)
+        colormap="coolwarm"
+    ).generate_from_frequencies(word_freq)
 
     fig, ax = plt.subplots(figsize=(10,5))
 
@@ -126,43 +122,43 @@ def plot_top_legal_terms(vectorizer, embeddings, top_n=20):
 
     st.pyplot(fig)
 
-def plot_keyword_cooccurrence(cases_text_list, top_n=15):
+def plot_keyword_cooccurrence(vectorizer, embeddings, texts, top_n=15):
 
-    combined_cooc = defaultdict(int)
+    terms = vectorizer.get_feature_names_out()
 
-    # reuse existing function
-    for text in cases_text_list:
-        cooc = build_cooccurrence(text)
+    scores = np.asarray(embeddings.sum(axis=0)).flatten()
 
-        for pair, count in cooc.items():
-            combined_cooc[pair] += count
+    top_idx = scores.argsort()[::-1][:top_n]
 
-    # extract vocabulary
-    vocab = set()
-    for w1, w2 in combined_cooc.keys():
-        vocab.add(w1)
-        vocab.add(w2)
+    vocab = [terms[i] for i in top_idx]
 
-    vocab = list(vocab)[:top_n]
-
-    # create matrix
     matrix = pd.DataFrame(0, index=vocab, columns=vocab)
 
-    for (w1, w2), count in combined_cooc.items():
-        if w1 in vocab and w2 in vocab:
-            matrix.loc[w1, w2] += count
-            matrix.loc[w2, w1] += count
+    for text in texts:
 
-    # plot heatmap
+        words = text.split()
+
+        for i in range(len(words)):
+            for j in range(i+1, len(words)):
+
+                w1, w2 = words[i], words[j]
+
+                if w1 in vocab and w2 in vocab:
+                    matrix.loc[w1, w2] += 1
+                    matrix.loc[w2, w1] += 1
+
     fig, ax = plt.subplots(figsize=(10,8))
 
     sns.heatmap(
         matrix,
         cmap="coolwarm",
         linewidths=0.5,
+        square=True,
         ax=ax
     )
 
-    ax.set_title("Legal Keyword Co-occurrence Heatmap")
+    ax.set_title("TF-IDF Keyword Co-occurrence Heatmap")
+
+    plt.xticks(rotation=45)
 
     st.pyplot(fig)
