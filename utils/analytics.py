@@ -64,7 +64,6 @@ def plot_similarity(similar_df):
 
 
 def show_wordcloud(similar_df, df):
-
     text = ""
 
     for file in similar_df["file_name"]:
@@ -73,11 +72,23 @@ def show_wordcloud(similar_df, df):
     if text.strip() == "":
         return
 
+    # custom legal stopwords
+    legal_stopwords = {
+        "court","case","judge","said","order","date","section",
+        "act","law","article","clause","person","report",
+        "period","detention","provision","reference"
+    }
+
+    stopwords = STOPWORDS.union(legal_stopwords)
+
     wc = WordCloud(
         width=900,
         height=450,
         background_color="white",
-        colormap="coolwarm"
+        colormap="coolwarm",
+        stopwords=stopwords,
+        max_words=120,
+        min_font_size=10
     ).generate(text)
 
     fig, ax = plt.subplots(figsize=(10,5))
@@ -86,7 +97,6 @@ def show_wordcloud(similar_df, df):
     ax.axis("off")
 
     st.pyplot(fig)
-
 
 def plot_top_legal_terms(vectorizer, embeddings, top_n=20):
 
