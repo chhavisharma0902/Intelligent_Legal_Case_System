@@ -122,30 +122,27 @@ def plot_top_legal_terms(vectorizer, embeddings, top_n=20):
 
     st.pyplot(fig)
 
-def plot_keyword_cooccurrence(vectorizer, embeddings, texts, top_n=15):
+def plot_keyword_cooccurrence(cases_text_list, top_n=15):
 
-    terms = vectorizer.get_feature_names_out()
+    word_counts = Counter()
 
-    scores = np.asarray(embeddings.sum(axis=0)).flatten()
+    for text in cases_text_list:
+        words = text.split()
+        word_counts.update(words)
 
-    top_idx = scores.argsort()[::-1][:top_n]
-
-    vocab = [terms[i] for i in top_idx]
+    vocab = [word for word, _ in word_counts.most_common(top_n)]
 
     matrix = pd.DataFrame(0, index=vocab, columns=vocab)
 
-    for text in texts:
+    for text in cases_text_list:
 
-        words = text.split()
+        words = set(text.split())
 
-        for i in range(len(words)):
-            for j in range(i+1, len(words)):
+        filtered_words = [w for w in words if w in vocab]
 
-                w1, w2 = words[i], words[j]
-
-                if w1 in vocab and w2 in vocab:
-                    matrix.loc[w1, w2] += 1
-                    matrix.loc[w2, w1] += 1
+        for w1, w2 in combinations(filtered_words, 2):
+            matrix.loc[w1, w2] += 1
+            matrix.loc[w2, w1] += 1
 
     fig, ax = plt.subplots(figsize=(10,8))
 
@@ -153,12 +150,9 @@ def plot_keyword_cooccurrence(vectorizer, embeddings, texts, top_n=15):
         matrix,
         cmap="coolwarm",
         linewidths=0.5,
-        square=True,
         ax=ax
     )
 
-    ax.set_title("TF-IDF Keyword Co-occurrence Heatmap")
-
-    plt.xticks(rotation=45)
+    ax.set_title("Legal Keyword Co-occurrence Heatmap")
 
     st.pyplot(fig)
