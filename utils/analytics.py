@@ -124,6 +124,10 @@ def plot_top_legal_terms(vectorizer, embeddings, top_n=20):
 
 def plot_keyword_cooccurrence(cases_text_list, top_n=15):
 
+    if not cases_text_list:
+        st.warning("No text available for co-occurrence analysis.")
+        return
+    
     word_counts = Counter()
 
     for text in cases_text_list:
