@@ -113,14 +113,22 @@ if menu == "Search Case":
             # SAVE HISTORY (IMPORTANT FIX)
             save_to_history(results_df, "Keyword_Search", keywords)
 
+            cases_text_list_keyword = []
+
+            for file in results_df["file_name"]:
+                text = df[df["file_name"] == file]["clean_text"].values[0]
+                cases_text_list_keyword.append(text)
+
+            subset_embeddings_keyword = vectorizer.transform(cases_text_list_keyword)
+
             st.success("Search saved to history")
             st.header("Analytics")
 
             plot_year_distribution(results_df)
             plot_similarity(results_df)
-            plot_top_legal_terms(vectorizer ,embeddings)
+            plot_top_legal_terms(vectorizer ,subset_embeddings_keyword)
             if st.checkbox("Show WordCloud"):
-                show_wordcloud(vectorizer,embeddings)
+                show_wordcloud(vectorizer,subset_embeddings_keyword)
 
     # ------------------------------
     # TEXT INPUT
@@ -176,17 +184,18 @@ if menu == "Search Case":
             text = df[df["file_name"] == file]["clean_text"].values[0]
             cases_text_list.append(text)
 
+        subset_embeddings = vectorizer.transform(cases_text_list)
         # ------------------------------
         # ANALYTICS
         # ------------------------------
         st.header("Analytics")
 
         plot_year_distribution(similar_df)
-        plot_top_legal_terms(vectorizer,embeddings)
+        plot_top_legal_terms(vectorizer,subset_embeddings)
         plot_similarity(similar_df)
-        plot_keyword_cooccurrence(vectorizer,embeddings,cases_text_list)
+        plot_keyword_cooccurrence(vectorizer,subset_embeddings,cases_text_list)
         st.subheader("Important Legal Terms WordCloud")
-        show_wordcloud(vectorizer,embeddings)
+        show_wordcloud(vectorizer,subset_embeddings)
 
 
 # ============================================
