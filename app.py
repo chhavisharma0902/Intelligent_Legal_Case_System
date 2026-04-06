@@ -12,8 +12,6 @@ from utils.analytics import plot_year_distribution, plot_similarity, show_wordcl
 from utils.history_manager import save_to_history, load_history
 from config import DATASET_FILE
 
-
-
 # --------------------------------
 # LOAD DATASET
 # --------------------------------
@@ -22,7 +20,6 @@ def load_dataset():
     df = pd.read_excel(DATASET_FILE)
     df["clean_text"] = df["clean_text"].fillna("")
     return df
-
 
 # --------------------------------
 # TF-IDF MODEL
@@ -41,8 +38,6 @@ def get_vectorizer_and_embeddings(df):
 
     return vectorizer, embeddings
 
-
-
 # --------------------------------
 # UI TITLE
 # --------------------------------
@@ -52,7 +47,6 @@ menu = st.sidebar.selectbox(
     "Menu",
     ["Search Case", "View History"]
 )
-
 
 # ============================================
 # SEARCH PAGE
